@@ -50,6 +50,7 @@ def main():
         for i in arr:
             if check(i["text"], criteria) == True:
                 client.retweet(i["id"])
+        sleep(36000)
 
 
 if __name__ == "__main__":
