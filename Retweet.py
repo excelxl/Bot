@@ -1,30 +1,50 @@
-import tweepy
-import time
+import requests
+import os
+import json
 
-api_key = "IIiL0NwPBOUH2IesaWhGLmOjW"
-api_secret = "JanHT5j4LR7PHOAISWOdxcaO8zNhD4ISyk4yOWaO0VyTpejNAD"
-bearer_token = r"AAAAAAAAAAAAAAAAAAAAAPDqowEAAAAAxAacEArn6CWtdZw%2Fa3kbhQ42ZDA%3DhPnBiAAtRjiDVvHLPXVjANcZO2QX2KK3rOMRWpI1TIpBf7IbCW"
-access_token = "1683294496384258048-ZFL4rIMQ06tly7kWD6GpqqhpGDDug8"
-access_token_secret = "TbdQm1TkKT30CgszvIsEuzn0AaERZL1z2gn8la5QOYWMq"
+# To set your enviornment variables in your terminal run the following line:
+# export 'BEARER_TOKEN'='<your_bearer_token>'
+bearer_token = os.environ.get("BEARER_TOKEN")
 
-client = tweepy.Client(bearer_token, api_key, api_secret, access_token, access_token_secret)
-auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_token_secret)
-api = tweepy.API(auth)
 
-class MyStream(tweepy.StreamingClient):
-    def on_tweet(self, tweet):
-        print(tweet.text)
-        
-        try:
-            client.retweet(tweet.id)
-        
-        except Exception as error:
-            print(error)
+def create_url():
+    # Specify the usernames that you want to lookup below
+    # You can enter up to 100 comma-separated values.
+    usernames = "usernames=TwitterDev,TwitterAPI"
+    user_fields = "user.fields=description,created_at"
+    # User fields are adjustable, options include:
+    # created_at, description, entities, id, location, name,
+    # pinned_tweet_id, profile_image_url, protected,
+    # public_metrics, url, username, verified, and withheld
+    url = "https://api.twitter.com/2/users/by?{}&{}".format(usernames, user_fields)
+    return url
 
-stream = MyStream(bearer_token = bearer_token)
 
-rule = tweepy.StreamRule("(Virat Kohli)(-is:retweet -is:reply)" )
+def bearer_oauth(r):
+    """
+    Method required by bearer token authentication.
+    """
 
-stream.add_rules(rule)
+    r.headers["Authorization"] = f"Bearer {bearer_token}"
+    r.headers["User-Agent"] = "v2UserLookupPython"
+    return r
 
-stream.filter()
+
+def connect_to_endpoint(url):
+    response = requests.request("GET", url, auth=bearer_oauth,)
+    print(response.status_code)
+    if response.status_code != 200:
+        raise Exception(
+            "Request returned an error: {} {}".format(
+                response.status_code, response.text
+            )
+        )
+    return response.json()
+
+def main():
+    url = create_url()
+    json_response = connect_to_endpoint(url)
+    print(json.dumps(json_response, indent=4, sort_keys=True))
+
+if __name__ == "__main__":
+    main()
