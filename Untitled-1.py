@@ -32,7 +32,7 @@ def main():
 
     query_params = data["QUERY"]
     criteria = data["CRITERIA"]
-
+    time=int(data["TIME"])
     client = tweepy.Client(
         bearer_token, api_key, api_secret, access_token, access_token_secret
     )
@@ -43,20 +43,26 @@ def main():
 
     api = tweepy.API(auth)
     while True:
-        str = json.loads(client.search_recent_tweets(query=query_params))
+        print("Searching for tweets all over Twitter")
+        str = json.loads(client.search_recent_tweets(query=query_params,start_time="12:00:01"))
         arr = []
         for set in str:
             arr.append([set["text"], set["id"]])
         for i in arr:
+            print("Checking tweets to see if it meets the requirement for retweet")
             if check(i["text"], criteria) == True:
+                print("Retweet")
                 client.retweet(i["id"])
+        print("Getting tweets from following people")
         str=json.loads(client.get_home_timeline())
         for set in str:
             arr.append([set["text"], set["id"]])
         for i in arr:
+            print("Checking if their tweets meets the requirements")
             if check(i["text"], criteria) == True:
+                print("Retweet")
                 client.retweet(i["id"])
-        sleep(36000)
+        sleep(time)
 
 
 if __name__ == "__main__":
