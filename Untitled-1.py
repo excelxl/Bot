@@ -51,6 +51,11 @@ def main():
             if check(i["text"], criteria) == True:
                 client.retweet(i["id"])
         str=json.loads(client.get_home_timeline())
+        for set in str:
+            arr.append([set["text"], set["id"]])
+        for i in arr:
+            if check(i["text"], criteria) == True:
+                client.retweet(i["id"])
         sleep(36000)
 
 
