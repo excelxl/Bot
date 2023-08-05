@@ -6,5 +6,7 @@
   "ACCESS_TOKEN_SECRET": "TbdQm1TkKT30CgszvIsEuzn0AaERZL1z2gn8la5QOYWMq",
   "QUERY": "",
   "CRITERIA": "",
-  "TIME":""
+  "TIME":"900",
+  "SLEEP":"5",
+  "WAKE":"7"
 }
