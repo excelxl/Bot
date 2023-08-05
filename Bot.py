@@ -7,7 +7,7 @@ import requests
 from Funcs import *
 from datetime import datetime
 from threading import Thread
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 with open(r"C:\Users\white\Documents\Bot\config.json") as json_file:
     data = json.load(json_file)
@@ -44,12 +44,12 @@ class retweet_follow(Thread):
 class retweet_search(Thread):
     def run(self):
         while True:
-            now = datetime.utcnow() - datetime.timedelta(minutes=5)
+            now = datetime.utcnow() - timedelta(minutes=5)
             format = "%Y-%m-%dT%H:%M:%SZ"
-            end = now.strftime(format)
+            start = now.strftime(format)
             print("Searching for tweets all over Twitter")
             str = json.loads(
-                client.search_recent_tweets(query=query_params, start_time=str(end))
+                client.search_recent_tweets(query=query_params, start_time=start)
             )
             arr = []
             for set in str.data:
@@ -75,13 +75,8 @@ def check(input, criteria):
 
 
 def main():
-    """while True:
-
-
-    sleep(time)"""
     retweet_follow().start()
     retweet_search().start()
-    sleep(10)
 
 
 if __name__ == "__main__":
