@@ -23,13 +23,16 @@ sleep = data["SLEEP"]
 client = tweepy.Client(
     bearer_token, api_key, api_secret, access_token, access_token_secret
 )
+auth = tweepy.OAuthHandler(api_key, api_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth)
 
 
 class retweet_follow(Thread):
     def run(self):
         while True:
             print("Getting tweets from following people")
-            str = json.loads(client.get_home_timeline())
+            str = json.loads(api.home_timeline(exclude_replies=True))
             arr = []
             for set in str:
                 arr.append([set["text"], set["id"]])
