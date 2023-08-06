@@ -8,6 +8,7 @@ from Funcs import *
 from datetime import datetime
 from threading import Thread
 from datetime import datetime, date, timedelta
+import mysql.connector
 
 with open(r"C:\Users\white\Documents\Bot\config.json") as json_file:
     data = json.load(json_file)
@@ -30,17 +31,19 @@ api = tweepy.API(auth)
 
 class retweet_follow(Thread):
     def run(self):
+        mydb = mysql.connector.connect(
+            host="localhost", user="admin", password="admin", database="bot"
+        )
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT * FROM follow")
+        myresult = mycursor.fetchall()
+        arr = []
+        arr.append(i[0] for i in myresult)
         while True:
-            print("Getting tweets from following people")
-            str = json.loads(api.home_timeline(exclude_replies=True))
-            arr = []
-            for set in str:
-                arr.append([set["text"], set["id"]])
             for i in arr:
-                print("Checking if their tweets meets the requirements")
-                if check(i["text"], criteria) == True:
-                    print("Retweet")
-                    client.retweet(i["id"])
+                data = api.user_timeline(
+                    i, count=1, include_rts=False, exclude_replies=True
+                )
             sleep(60)
 
 
