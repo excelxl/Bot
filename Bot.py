@@ -61,12 +61,12 @@ class retweet_follow(Thread):
 class retweet_search(Thread):
     def run(self):
         while True:
-            now = datetime.utcnow() - timedelta(minutes=5)
+            now = datetime.utcnow() - timedelta(minutes=15)
             format = "%Y-%m-%dT%H:%M:%SZ"
             start = now.strftime(format)
             print("Searching for tweets all over Twitter")
             str = json.loads(
-                client.search_recent_tweets(query=query_params, start_time=start)
+                api.search_tweets(query=query_params, start_time=start)
             )
             arr = []
             for set in str.data:
