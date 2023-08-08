@@ -51,8 +51,9 @@ class retweet_follow(Thread):
                     )
                 )
                 for tweet in arr:
+                    hash=tweet["entities"]["hashtags"]
                     if tweet["id"] != i[1]:
-                        if check(tweet[id]):
+                        if check(hash):
                             api.retweet()
             sleep(60)
 
@@ -79,7 +80,7 @@ class retweet_search(Thread):
 
 
 def check(input):
-    with open("keyword.txt") as file:
+    with open("hashtags.txt") as file:
         lines = [line.rstrip() for line in file]
     count = 0
     arr = lines.split(" ")
@@ -87,7 +88,7 @@ def check(input):
     for i in arr:
         if i in inp:
             count += 1
-    if count / len(inp) > criteria:
+    if count > criteria:
         return True
     return False
 
