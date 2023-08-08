@@ -20,7 +20,11 @@ access_token_secret = data["ACCESS_TOKEN_SECRET"]
 query_params = data["QUERY"]
 criteria = data["CRITERIA"]
 time = int(data["TIME"])
-sleep = data["SLEEP"]
+sleep_time = data["SLEEP"]
+db_host = data["DB_HOST"]
+db_user = data["DB_USER"]
+db_password = data["DB_PASSWORD"]
+db_name = data["DB_NAME"]
 client = tweepy.Client(
     bearer_token, api_key, api_secret, access_token, access_token_secret
 )
@@ -32,18 +36,24 @@ api = tweepy.API(auth)
 class retweet_follow(Thread):
     def run(self):
         mydb = mysql.connector.connect(
-            host="localhost", user="admin", password="admin", database="bot"
+            host=db_host, user=db_user, password=db_password, database=db_name
         )
         mycursor = mydb.cursor()
         mycursor.execute("SELECT * FROM follow")
         myresult = mycursor.fetchall()
         arr = []
-        arr.append(i[0] for i in myresult)
+        arr.append([i[0], i[1]] for i in myresult)
         while True:
             for i in arr:
-                data = api.user_timeline(
-                    i, count=1, include_rts=False, exclude_replies=True
+                arr = json.loads(
+                    api.user_timeline(
+                        i[0], count=10, include_rts=False, exclude_replies=True
+                    )
                 )
+                for tweet in arr:
+                    if tweet["id"] != i[1]:
+                        if check(tweet[id]):
+                            api.retweet()
             sleep(60)
 
 
@@ -68,21 +78,24 @@ class retweet_search(Thread):
             sleep(900)
 
 
-def check(input, criteria):
+def check(input):
+    with open("keyword.txt") as file:
+        lines = [line.rstrip() for line in file]
     count = 0
-    arr = input.split(" ")
-    inp = criteria.split(" ")
+    arr = lines.split(" ")
+    inp = input.split(" ")
     for i in arr:
         if i in inp:
             count += 1
-    if count > criteria:
+    if count / len(inp) > criteria:
         return True
     return False
 
 
 def main():
+    """
     retweet_follow().start()
-    retweet_search().start()
+    retweet_search().start()"""
 
 
 if __name__ == "__main__":
