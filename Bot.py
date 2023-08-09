@@ -25,9 +25,6 @@ db_host = data["DB_HOST"]
 db_user = data["DB_USER"]
 db_password = data["DB_PASSWORD"]
 db_name = data["DB_NAME"]
-client = tweepy.Client(
-    bearer_token, api_key, api_secret, access_token, access_token_secret
-)
 auth = tweepy.OAuthHandler(api_key, api_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
@@ -51,10 +48,10 @@ class retweet_follow(Thread):
                     )
                 )
                 for tweet in arr:
-                    hash=tweet["entities"]["hashtags"]
+                    hash = tweet["entities"]["hashtags"]
                     if tweet["id"] != i[1]:
                         if check(hash):
-                            api.retweet()
+                            api.retweet(tweet["id"])
             sleep(60)
 
 
@@ -65,19 +62,36 @@ class retweet_search(Thread):
             format = "%Y-%m-%dT%H:%M:%SZ"
             start = now.strftime(format)
             print("Searching for tweets all over Twitter")
-            str = json.loads(
-                api.search_tweets(query=query_params, start_time=start)
-            )
-            arr = []
-            for set in str.data:
-                arr.append([set.text, set.id])
-            for i in arr:
+            arr = json.loads(api.search_tweets(query=query_params, start_time=start))
+            for i in arr["statuses"]:
+                hash = i["entities"]["hashtags"]
                 print("Checking tweets to see if it meets the requirement for retweet")
-                if check(i[0], criteria) == True:
+                if check(hash) == True:
                     print("Retweet")
-                    client.retweet(i[1])
+                    api.retweet(i["id"])
             sleep(900)
 
+
+class post_stuff(Thread):
+    def run(self):
+        mydb = mysql.connector.connect(
+            host=db_host, user=db_user, password=db_password, database=db_name
+        )
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT * FROM posts ORDER BY id DESC LIMIT 1;")
+        myresult = mycursor.fetchone()
+        arr = []
+        arr.append([i[0], i[1]] for i in myresult)
+        mycursor.execute("SELECT * FROM schedule;")
+        myresult = mycursor.fetchall()
+        timetable = []
+        timetable.append(i[0] for i in myresult)
+        while True:
+            curr_time = time.strftime("%H:%M:%S", time.localtime())
+            if curr_time in timetable:
+                #Tweet command being worked on
+                print()
+        
 
 def check(input):
     with open("hashtags.txt") as file:
