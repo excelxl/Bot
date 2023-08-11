@@ -14,3 +14,9 @@ DB_USER: user login credential for database
 DB_PASSWORD: password login credential for database
 DB_NAME: database name
 PATH: path to look for images when tweeting company's posts
+
+GUIDE to creating directories in the PATH folder:
+When you insert a row into the POSTS table in the BOT databse, you'll also assign an id to the post
+Create a folder with the id of the post you want to include the images in
+Copy your images inside that folder with the id name, maximum 4 images per post
+
