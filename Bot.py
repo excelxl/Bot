@@ -1,10 +1,10 @@
+import time
 from requests_oauthlib import OAuth1Session
 import tweepy
 import os
 import json
 from time import sleep
 import requests
-from Funcs import *
 from datetime import datetime
 from threading import Thread
 from datetime import datetime, date, timedelta
@@ -19,12 +19,14 @@ access_token = data["ACCESS_TOKEN"]
 access_token_secret = data["ACCESS_TOKEN_SECRET"]
 query_params = data["QUERY"]
 criteria = data["CRITERIA"]
-time = int(data["TIME"])
+times = int(data["TIME_S"])
+timef = int(data["TIME_F"])
 sleep_time = data["SLEEP"]
 db_host = data["DB_HOST"]
 db_user = data["DB_USER"]
 db_password = data["DB_PASSWORD"]
 db_name = data["DB_NAME"]
+path = data["PATH"]
 auth = tweepy.OAuthHandler(api_key, api_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
@@ -40,7 +42,8 @@ class retweet_follow(Thread):
         myresult = mycursor.fetchall()
         arr = []
         arr.append([i[0], i[1]] for i in myresult)
-        while True:
+        curr_time = time.strftime("%H", time.localtime())
+        while curr_time != "17" and curr_time != "18":
             for i in arr:
                 arr = json.loads(
                     api.user_timeline(
@@ -52,12 +55,13 @@ class retweet_follow(Thread):
                     if tweet["id"] != i[1]:
                         if check(hash):
                             api.retweet(tweet["id"])
-            sleep(60)
+            sleep(timef)
 
 
 class retweet_search(Thread):
     def run(self):
-        while True:
+        curr_time = time.strftime("%H", time.localtime())
+        while curr_time != "17" and curr_time != "18":
             now = datetime.utcnow() - timedelta(minutes=15)
             format = "%Y-%m-%dT%H:%M:%SZ"
             start = now.strftime(format)
@@ -69,7 +73,7 @@ class retweet_search(Thread):
                 if check(hash) == True:
                     print("Retweet")
                     api.retweet(i["id"])
-            sleep(900)
+            sleep(times)
 
 
 class post_stuff(Thread):
@@ -78,20 +82,25 @@ class post_stuff(Thread):
             host=db_host, user=db_user, password=db_password, database=db_name
         )
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT * FROM posts ORDER BY id DESC LIMIT 1;")
-        myresult = mycursor.fetchone()
-        arr = []
-        arr.append([i[0], i[1]] for i in myresult)
         mycursor.execute("SELECT * FROM schedule;")
         myresult = mycursor.fetchall()
         timetable = []
         timetable.append(i[0] for i in myresult)
-        while True:
+        curr_time = time.strftime("%H", time.localtime())
+        while curr_time != "17" and curr_time != "18":
             curr_time = time.strftime("%H:%M:%S", time.localtime())
             if curr_time in timetable:
-                #Tweet command being worked on
-                print()
-        
+                mycursor.execute("SELECT * FROM posts ORDER BY id DESC LIMIT 1;")
+                myresult = mycursor.fetchone()
+                arr = []
+                arr.append([i[0], i[1]] for i in myresult)
+                files = os.listdir(path+"/"+arr[0][0])
+                media=[]
+                for i in len(files):
+                    media.append(api.media_upload(path+"/"+arr[0][0]+"/"+i))
+                api.update_status(arr[0][1],media=media)
+
+
 
 def check(input):
     with open("hashtags.txt") as file:
@@ -108,9 +117,9 @@ def check(input):
 
 
 def main():
-    """
     retweet_follow().start()
-    retweet_search().start()"""
+    retweet_search().start()
+    post_stuff().start()
 
 
 if __name__ == "__main__":
