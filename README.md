@@ -20,3 +20,4 @@ When you insert a row into the POSTS table in the BOT databse, you'll also assig
 Create a folder with the id of the post you want to include the images in
 Copy your images inside that folder with the id name, maximum 4 images per post
 
+Hashtag file: insert hashtags you want to search and scan posts with, one hastag per line
