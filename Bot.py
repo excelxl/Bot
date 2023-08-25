@@ -21,7 +21,6 @@ query_params = data["QUERY"]
 criteria = data["CRITERIA"]
 times = int(data["TIME_S"])
 timef = int(data["TIME_F"])
-sleep_time = data["SLEEP"]
 db_host = data["DB_HOST"]
 db_user = data["DB_USER"]
 db_password = data["DB_PASSWORD"]
@@ -31,6 +30,10 @@ auth = tweepy.OAuthHandler(api_key, api_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
 
+search=open("sample_search.txt",)
+searchr=json.load(search)
+follow=open("sample_response.txt")
+followr=json.load(follow)
 
 class retweet_follow(Thread):
     def run(self):
@@ -45,11 +48,8 @@ class retweet_follow(Thread):
         curr_time = time.strftime("%H", time.localtime())
         while curr_time != "17" and curr_time != "18":
             for i in arr:
-                arr = json.loads(
-                    api.user_timeline(
-                        i[0], count=10, include_rts=False, exclude_replies=True
-                    )
-                )
+                #arr = json.loads(api.user_timeline(i[0], count=10, include_rts=False, exclude_replies=True))
+                arr=followr
                 for tweet in arr:
                     hash = tweet["entities"]["hashtags"]
                     if tweet["id"] != i[1]:
@@ -66,7 +66,8 @@ class retweet_search(Thread):
             format = "%Y-%m-%dT%H:%M:%SZ"
             start = now.strftime(format)
             print("Searching for tweets all over Twitter")
-            arr = json.loads(api.search_tweets(query=query_params, start_time=start))
+            #arr = json.loads(api.search_tweets(query=query_params, start_time=start))
+            arr=searchr
             for i in arr["statuses"]:
                 hash = i["entities"]["hashtags"]
                 print("Checking tweets to see if it meets the requirement for retweet")
@@ -86,8 +87,8 @@ class post_stuff(Thread):
         myresult = mycursor.fetchall()
         timetable = []
         timetable.append(i[0] for i in myresult)
-        curr_time = time.strftime("%H", time.localtime())
-        while curr_time != "17" and curr_time != "18":
+        currtime = time.strftime("%H", time.localtime())
+        while currtime != "17" and curr_time != "18":
             curr_time = time.strftime("%H:%M:%S", time.localtime())
             if curr_time in timetable:
                 mycursor.execute("SELECT * FROM posts ORDER BY id DESC LIMIT 1;")
